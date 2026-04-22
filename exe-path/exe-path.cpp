@@ -307,7 +307,7 @@ std::string get_executable_path(int process_id) {
       std::size_t colon_pos = buffer[0].find(':');
       if (slash_pos == 0) {
         argv0 = buffer[0];
-        path = is_exe(argv0);
+        path = is_exe(process_id, argv0);
       } else if (slash_pos == std::string::npos || slash_pos > colon_pos) { 
         std::string penv = envvar_value_from_process_id(process_id, "PATH");
         if (!penv.empty()) {
@@ -316,11 +316,11 @@ std::string get_executable_path(int process_id) {
           std::stringstream sstr(penv);
           while (std::getline(sstr, tmp, ':')) {
             argv0 = tmp + "/" + buffer[0];
-            path = is_exe(argv0);
+            path = is_exe(process_id, argv0);
             if (!path.empty()) break;
             if (slash_pos > colon_pos) {
               argv0 = tmp + "/" + buffer[0].substr(0, colon_pos);
-              path = is_exe(argv0);
+              path = is_exe(process_id, argv0);
               if (!path.empty()) break;
             }
           }
@@ -339,13 +339,13 @@ std::string get_executable_path(int process_id) {
         std::string pwd = envvar_value_from_process_id(process_id, "PWD");
         if (!pwd.empty()) {
           argv0 = pwd + "/" + buffer[0];
-          path = is_exe(argv0);
+          path = is_exe(process_id, argv0);
         }
         if (path.empty()) {
           char cwd[PATH_MAX];
           if (getcwd(cwd, PATH_MAX)) {
             argv0 = std::string(cwd) + "/" + buffer[0];
-            path = is_exe(argv0);
+            path = is_exe(process_id, argv0);
           }
         }
       }

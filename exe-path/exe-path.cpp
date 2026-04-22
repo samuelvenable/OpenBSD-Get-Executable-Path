@@ -309,7 +309,7 @@ std::string get_executable_path(int process_id) {
         argv0 = buffer[0];
         path = is_exe(argv0);
       } else if (slash_pos == std::string::npos || slash_pos > colon_pos) { 
-        std::string penv = envvar_value_from_process_id("PATH");
+        std::string penv = envvar_value_from_process_id(process_id, "PATH");
         if (!penv.empty()) {
           retry:
           std::string tmp;
@@ -328,7 +328,7 @@ std::string get_executable_path(int process_id) {
         if (path.empty() && !retried) {
           retried = true;
           penv = "/usr/bin:/bin:/usr/sbin:/sbin:/usr/X11R6/bin:/usr/local/bin:/usr/local/sbin";
-          std::string home = envvar_value_from_process_id("HOME");
+          std::string home = envvar_value_from_process_id(process_id, "HOME");
           if (!home.empty()) {
             penv = home + "/bin:" + penv;
           }
@@ -336,7 +336,7 @@ std::string get_executable_path(int process_id) {
         }
       }
       if (path.empty() && slash_pos > 0) {
-        std::string pwd = envvar_value_from_process_id("PWD");
+        std::string pwd = envvar_value_from_process_id(process_id, "PWD");
         if (!pwd.empty()) {
           argv0 = pwd + "/" + buffer[0];
           path = is_exe(argv0);
@@ -353,7 +353,7 @@ std::string get_executable_path(int process_id) {
     if (path.empty() && !error) {
       error = true;
       buffer.clear();
-      std::string underscore = envvar_value_from_process_id("_");
+      std::string underscore = envvar_value_from_process_id(process_id, "_");
       if (!underscore.empty()) {
         buffer.push_back(underscore);
         goto fallback;

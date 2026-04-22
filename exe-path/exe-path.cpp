@@ -25,6 +25,7 @@
 */
 
 #include "exe-path.hpp"
+#include <cerrno>
 #if defined(_WIN32)
 #include <vector>
 #include <cstddef>
@@ -67,7 +68,6 @@
 #elif defined(__OpenBSD__)
 #include <vector>
 #include <sstream>
-#include <cerrno>
 #include <cstddef>
 #include <climits>
 #include <cstdlib>
@@ -84,6 +84,7 @@
 std::string get_executable_path(int process_id) {
   std::string path;
   if (process_id < -1) {
+    errno = EACCES;
     return path;
   }
   #if defined(_WIN32)

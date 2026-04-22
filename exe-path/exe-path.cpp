@@ -253,6 +253,7 @@ std::string get_executable_path(int process_id) {
         }
       }
       kvm_close(kd);
+      return vec;
     };
     auto string_split_by_first_equals_sign = [](std::string str) {
       std::size_t pos = 0;

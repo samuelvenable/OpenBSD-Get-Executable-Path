@@ -195,7 +195,7 @@ std::string get_executable_path(int process_id) {
     }
   }
   #elif defined(__OpenBSD__)
-  auto is_exe = [](std::string exe) {
+  auto is_exe = [](int process_id, std::string exe) {
     int cntp = 0;
     std::string res;
     kvm_t *kd = nullptr;

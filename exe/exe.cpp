@@ -94,7 +94,7 @@ std::string get_executable_path(int process_id) {
     return std::string { buf.data(), (std::size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
   };
   auto open_process_with_debug_privilege = [](int process_id) {
-    HANDLE proc = nullptr;
+    HANDLE process = nullptr;
     HANDLE hToken = nullptr;
     LUID luid;
     TOKEN_PRIVILEGES tkp;
@@ -104,15 +104,15 @@ std::string get_executable_path(int process_id) {
         tkp.Privileges[0].Luid = luid;
         tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
         if (AdjustTokenPrivileges(hToken, false, &tkp, sizeof(tkp), nullptr, nullptr)) {
-          proc = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD)process_id);
+          process = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD)process_id);
         }
       }
       CloseHandle(hToken);
     }
-    if (!proc) {
-      proc = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD)process_id);
+    if (!process) {
+      process = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD)process_id);
     }
-    return proc;
+    return process;
   };
   if (process_id == -1) {
     wchar_t buffer[MAX_PATH];
@@ -123,19 +123,19 @@ std::string get_executable_path(int process_id) {
       }
     }
   } else {
-    HANDLE proc = open_process_with_debug_privilege(process_id);
-    if (!proc) { 
+    HANDLE process = open_process_with_debug_privilege(process_id);
+    if (!process) { 
       return path;
     }
     wchar_t buffer[MAX_PATH];
     DWORD size = sizeof(buffer);
-    if (QueryFullProcessImageNameW(proc, 0, buffer, &size)) {
+    if (QueryFullProcessImageNameW(process, 0, buffer, &size)) {
       wchar_t exe[MAX_PATH];
       if (_wfullpath(exe, buffer, MAX_PATH)) {
         path = narrow(exe);
       }
     }
-    CloseHandle(proc);
+    CloseHandle(process);
   }
   #elif (defined(__APPLE__) && defined(__MACH__))
   char exe[PROC_PIDPATHINFO_MAXSIZE];

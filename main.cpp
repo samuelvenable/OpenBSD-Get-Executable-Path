@@ -28,14 +28,20 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
+#include <cstdlib>
 
-int main() {
-  std::string exe = get_executable_path();
+int main(int argc, char **argv) {
+  std::string exe;
+  int process_id = -1;
+  if (argc > 1) {
+    process_id = std::atoi(argv[1]);
+  }
+  exe = get_executable_path(process_id);
   bool failed = exe.empty();
   if (!failed) {
-    printf("get_executable_path() result: %s\n", exe.c_str());
+    printf("get_executable_path(%d) result: %s\n", process_id, exe.c_str());
   } else {
-    printf("get_executable_path() error: %s\n", strerror(errno));
+    printf("get_executable_path(%d) error: %s\n", process_id, strerror(errno));
   }
   return failed;
 }

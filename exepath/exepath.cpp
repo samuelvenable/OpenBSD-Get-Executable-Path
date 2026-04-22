@@ -24,7 +24,7 @@
  
 */
 
-#include "exe-path.hpp"
+#include "exepath.hpp"
 #include <cerrno>
 #if defined(_WIN32)
 #include <vector>

@@ -1,23 +1,23 @@
 #!/bin/sh
 cd "${0%/*}"
 if [ $(uname) = "Darwin" ]; then
-  clang++ exe-path/exe-path.cpp main.cpp -o a.out -std=c++17 -Wall -arch arm64 -arch x86_64; ./a.out;
+  clang++ exepath/exepath.cpp process/process.cpp main.cpp -o a.out -std=c++17 -Wall -arch arm64 -arch x86_64; ./a.out;
 elif [ $(uname) = "Linux" ]; then
   if [ -f "/bin/g++" ]; then
-    g++ exe-path/exe-path.cpp main.cpp -o a.out -std=c++17 -Wall -static-libgcc -static-libstdc++ -static; ./a.out;
+    g++ exepath/exepath.cpp process/process.cpp main.cpp -o a.out -std=c++17 -Wall -static-libgcc -static-libstdc++ -static; ./a.out;
   else
-    clang++ exe-path/exe-path.cpp main.cpp -o a.out -std=c++17 -Wall; ./a.out;
+    clang++ exepath/exepath.cpp process/process.cpp main.cpp -o a.out -std=c++17 -Wall; ./a.out;
   fi
 elif [ $(uname) = "FreeBSD" ]; then
-  clang++ exe-path/exe-path.cpp main.cpp -o a.out -std=c++17 -Wall -static; ./a.out;
+  clang++ exepath/exepath.cpp process/process.cpp main.cpp -o a.out -std=c++17 -Wall -lelf -lkvm -lpthread -static; ./a.out;
 elif [ $(uname) = "DragonFly" ]; then
-  g++ exe-path/exe-path.cpp main.cpp -o a.out -std=c++17 -Wall -static-libgcc -static-libstdc++ -static; ./a.out;
+  g++ exepath/exepath.cpp process/process.cpp main.cpp -o a.out -std=c++17 -Wall -static-libgcc -static-libstdc++ -lkvm -lpthread -static; ./a.out;
 elif [ $(uname) = "NetBSD" ]; then
-  g++ exe-path/exe-path.cpp main.cpp -o a.out -std=c++17 -Wall -static-libgcc -static-libstdc++ -static; ./a.out;
+  g++ exepath/exepath.cpp process/process.cpp main.cpp -o a.out -std=c++17 -Wall -static-libgcc -static-libstdc++ -lkvm -lpthread -static; ./a.out;
 elif [ $(uname) = "OpenBSD" ]; then
-  clang++ exe-path/exe-path.cpp main.cpp -o a.out -std=c++17 -Wall -lkvm -static; ./a.out;
+  clang++ exepath/exepath.cpp process/process.cpp main.cpp -o a.out -std=c++17 -Wall -lkvm -lpthread -static; ./a.out;
 elif [ $(uname) = "SunOS" ]; then
-  g++ exe-path/exe-path.cpp main.cpp -o a.out -std=c++17 -Wall -static-libgcc; ./a.out;
+  g++ exepath/exepath.cpp process/process.cpp main.cpp -o a.out -std=c++17 -Wall -static-libgcc -lkvm -lproc; ./a.out;
 else
-  g++ exe-path/exe-path.cpp main.cpp -o a.out.exe -std=c++17 -Wall -static-libgcc -static-libstdc++ -static -Wl,--subsystem,console; ./a.out.exe;
+  g++ exepath/exepath.cpp process/process.cpp main.cpp -o a.out.exe -std=c++17 -Wall -static-libgcc -static-libstdc++ -static -lntdll -Wl,--subsystem,console; ./a.out.exe;
 fi

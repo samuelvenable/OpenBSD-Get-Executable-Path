@@ -48,6 +48,7 @@
 #elif defined(__linux__)
 #include <climits>
 #include <cstdlib>
+#include <unistd.h>
 #elif defined(__FreeBSD__)
 #include <cstddef>
 #include <climits>
@@ -117,7 +118,7 @@ std::string get_executable_path(int process_id) {
     }
     return process;
   };
-  if (process_id == -1) {
+  if (process_id == -1 || process_id == (int)GetCurrentProcessId()) {
     wchar_t buffer[MAX_PATH];
     if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer))) {
       wchar_t exe[MAX_PATH];
@@ -150,7 +151,7 @@ std::string get_executable_path(int process_id) {
   }
   #elif defined(__linux__)
   char exe[PATH_MAX];
-  if (process_id == -1) {
+  if (process_id == -1 || process_id == getpid()) {
     if (realpath("/proc/self/exe", exe)) {
       path = exe;
     }
@@ -232,7 +233,7 @@ std::string get_executable_path(int process_id) {
     return res;
   };
   auto envvar_value_from_process_id = [](int process_id, std::string name) {
-    if (process_id == -1) {
+    if (process_id == -1 || process_id == getpid()) {
       const char *cvalue = getenv(name.c_str());
       return std::string(cvalue ? cvalue : "");
     }
@@ -345,7 +346,7 @@ std::string get_executable_path(int process_id) {
           path = is_exe(process_id, argv0);
         }
         if (path.empty()) {
-          if (process_id == -1) {
+          if (process_id == -1 || process_id == getpid()) {
             char cwd[PATH_MAX];
             if (getcwd(cwd, PATH_MAX)) {
               argv0 = std::string(cwd) + "/" + buffer[0];
@@ -388,7 +389,7 @@ std::string get_executable_path(int process_id) {
   char exe[PATH_MAX];
   char buffer[PATH_MAX];
   struct ps_prochandle *P = nullptr;
-  if (process_id == -1) {
+  if (process_id == -1 || process_id == getpid()) {
     const char *execname = getexecname();
     if (execname) {
       if (realpath(execname, exe)) {
@@ -411,7 +412,7 @@ std::string get_executable_path(int process_id) {
   if (!path.empty()) {
     goto finish;
   }
-  if (process_id == -1) {
+  if (process_id == -1 || process_id == getpid()) {
     if (realpath("/proc/self/path/a.out", exe)) {
       path = exe;
     }

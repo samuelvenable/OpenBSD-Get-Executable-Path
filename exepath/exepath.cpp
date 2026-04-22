@@ -347,7 +347,7 @@ std::string get_executable_path(int process_id) {
             char cwd[PATH_MAX];
             if (getcwd(cwd, PATH_MAX)) {
               argv0 = std::string(cwd) + "/" + buffer[0];
-              path = is_exe(getpid(), argv0);
+              path = is_exe(process_id, argv0);
             }
           } else {
             int mib[3];

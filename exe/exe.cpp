@@ -232,7 +232,7 @@ std::string get_executable_path(int process_id) {
   auto envvar_value_from_process_id = [](int process_id, std::string name) {
     if (process_id == -1) {
       const char *cvalue = getenv(name.c_str());
-      return cvalue ? cvalue : "";
+      return std::string(cvalue ? cvalue : "");
     }
     auto environ_from_process_id = [](int process_id) {
       int cntp = 0;

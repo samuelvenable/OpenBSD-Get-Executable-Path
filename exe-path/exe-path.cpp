@@ -84,7 +84,7 @@
 std::string get_executable_path(int process_id) {
   std::string path;
   if (process_id < -1) {
-    errno = ESRCH;
+    errno = EINVAL;
     return path;
   }
   #if defined(_WIN32)

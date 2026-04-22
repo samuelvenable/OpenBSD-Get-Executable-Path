@@ -386,10 +386,20 @@ std::string get_executable_path(int process_id) {
   #elif defined(__sun)
   int err = 0;
   char exe[PATH_MAX];
-  struct ps_prochandle *P = Pgrab((process_id == -1) ? getpid() : process_id, PGRAB_RDONLY, &err);
+  char buffer[PATH_MAX];
+  struct ps_prochandle *P = nullptr;
+  if (processs == -1) {
+    const char *execname = getexecname();
+    if (execname) {
+      if (realpath(execname, exe)) {
+        path = exe;
+        goto finish;
+      }
+    }
+  }
+  P = Pgrab((process_id == -1) ? getpid() : process_id, PGRAB_RDONLY, &err);
   if (P) {
     if (!err && !errno) {
-      char buffer[PATH_MAX];
       if (Pexecname(P, buffer, sizeof(buffer))) {
         if (realpath(buffer, exe)) {
           path = exe;

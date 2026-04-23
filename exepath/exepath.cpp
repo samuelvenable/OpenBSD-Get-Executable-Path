@@ -37,6 +37,7 @@
 #if (defined(TARGET_OS_OSX) && TARGET_OS_OSX)
 #include <climits>
 #include <cstdlib>
+#include <mach-o/dyld.h>
 #include <libproc.h>
 #include <unistd.h>
 #endif

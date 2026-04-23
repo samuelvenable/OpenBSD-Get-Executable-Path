@@ -25,22 +25,22 @@
 */
 
 #include "pidpath/pidpath.hpp"
-#include "process/process.hpp"
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
 
 int main(int argc, char **argv) {
-  std::vector<ngs::ps::NGS_PROCID> process_id = ngs::ps::proc_id_enum();
-  for (std::size_t i = 0; i < process_id.size(); i++) {
-    std::string exe = pidpath::get_executable_path((int)process_id[i]);
-    bool failed = exe.empty();
-    if (!failed) {
-      printf("get_executable_path(%d) result: %s\n", (int)process_id[i], exe.c_str());
-    } else {
-      //printf("get_executable_path(%d) error: %s\n", (int)process_id[i], strerror(errno));
-    }
+  int process_id = -1;
+  if (argc > 1) {
+    process_id = atoi(argv[1]);
+  }
+  std::string exe = pidpath::get_executable_path(process_id);
+  bool failed = exe.empty();
+  if (!failed) {
+    printf("get_executable_path(%d) result: %s\n", process_id, exe.c_str());
+  } else {
+    printf("get_executable_path(%d) error: %s\n", process_id, strerror(errno));
   }
   return 0;
 }

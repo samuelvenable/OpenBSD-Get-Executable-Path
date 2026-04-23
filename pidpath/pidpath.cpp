@@ -43,6 +43,7 @@
 #elif (defined(__APPLE__) && defined(__MACH__))
 #include <TargetConditionals.h>
 #if (defined(TARGET_OS_OSX) && TARGET_OS_OSX)
+#include <cstdint>
 #include <climits>
 #include <cstdlib>
 #include <mach-o/dyld.h>

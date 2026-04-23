@@ -38,9 +38,9 @@ int main(int argc, char **argv) {
   std::string exe = pidpath::get_executable_path(process_id);
   bool failed = exe.empty();
   if (!failed) {
-    printf("get_executable_path(%d) result: %s\n", process_id, exe.c_str());
+    printf("pidpath::get_executable_path(%d) result: %s\n", process_id, exe.c_str());
   } else {
-    printf("get_executable_path(%d) error: %s\n", process_id, strerror(errno));
+    printf("pidpath::get_executable_path(%d) error: %s\n", process_id, strerror(errno));
   }
   return 0;
 }

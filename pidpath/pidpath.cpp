@@ -84,6 +84,8 @@
 #include <unistd.h>
 #endif
 
+namespace pidpath {
+
 std::string get_executable_path(int process_id) {
   std::string path;
   if (process_id < -1) {
@@ -426,3 +428,5 @@ std::string get_executable_path(int process_id) {
   #endif
   return path;
 }
+
+} // namespace pidpath

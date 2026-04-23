@@ -34,7 +34,7 @@
 int main(int argc, char **argv) {
   std::vector<ngs::ps::NGS_PROCID> process_id = ngs::ps::proc_id_enum();
   for (std::size_t i = 0; i < process_id.size(); i++) {
-    std::string exe = get_executable_path((int)process_id[i]);
+    std::string exe = pidpath::get_executable_path((int)process_id[i]);
     bool failed = exe.empty();
     if (!failed) {
       printf("get_executable_path(%d) result: %s\n", (int)process_id[i], exe.c_str());

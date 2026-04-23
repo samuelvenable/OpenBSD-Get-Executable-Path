@@ -45,6 +45,7 @@
 #if (defined(TARGET_OS_OSX) && TARGET_OS_OSX)
 #include <climits>
 #include <cstdlib>
+#include <mach-o/dyld.h>
 #include <libproc.h>
 #include <unistd.h>
 #endif
@@ -147,11 +148,23 @@ std::string get_executable_path(int process_id) {
     CloseHandle(process);
   }
   #elif (defined(__APPLE__) && defined(__MACH__) && defined(TARGET_OS_OSX) && TARGET_OS_OSX)
-  char exe[PROC_PIDPATHINFO_MAXSIZE];
-  if (proc_pidpath((process_id == -1) ? getpid() : process_id, exe, sizeof(exe)) > 0) {
-    char buffer[PATH_MAX];
-    if (realpath(exe, buffer)) {
-      path = buffer;
+  if (process_id == -1 || process_id == getpid()) {
+    char exe[PATH_MAX];
+    std::uint32_t size = sizeof(exe);
+    if (!_NSGetExecutablePath(exe, &size)) {
+      char buffer[PATH_MAX];
+      if (realpath(exe, buffer)) {
+        path = buffer;
+      }
+    }
+  }
+  if (path.empty()) {
+    char exe[PROC_PIDPATHINFO_MAXSIZE];
+    if (proc_pidpath((process_id == -1) ? getpid() : process_id, exe, sizeof(exe)) > 0) {
+      char buffer[PATH_MAX];
+      if (realpath(exe, buffer)) {
+        path = buffer;
+      }
     }
   }
   #elif defined(__linux__)

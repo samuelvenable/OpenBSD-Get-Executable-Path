@@ -65,7 +65,6 @@
 #elif defined(__OpenBSD__)
 #include <vector>
 #include <sstream>
-#include <cerrno>
 #include <cstddef>
 #include <climits>
 #include <cstdlib>
@@ -275,9 +274,6 @@ std::string get_executable_path() {
         goto fallback;
       }
     }
-  }
-  if (!path.empty()) {
-    errno = 0;
   }
   #elif defined(__sun)
   char exe[PATH_MAX];

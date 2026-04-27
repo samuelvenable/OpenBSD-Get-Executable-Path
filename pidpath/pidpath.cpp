@@ -248,7 +248,7 @@ namespace pidpath {
       kvm_close(kd);
       return res;
     };
-    auto envvar_value_from_process_id = [](int process_id, std::string name) {
+    auto cppstr_getenv = [](int process_id, std::string name) {
       if (process_id == -1 || process_id == getpid()) {
         const char *cvalue = getenv(name.c_str());
         return std::string(cvalue ? cvalue : "");
@@ -329,7 +329,7 @@ namespace pidpath {
           argv0 = buffer[0];
           path = is_exe(process_id, argv0);
         } else if (slash_pos == std::string::npos || slash_pos > colon_pos) { 
-          std::string penv = envvar_value_from_process_id(process_id, "PATH");
+          std::string penv = cppstr_getenv(process_id, "PATH");
           if (!penv.empty()) {
             retry:
             std::string tmp;
@@ -348,7 +348,7 @@ namespace pidpath {
           if (path.empty() && !retried) {
             retried = true;
             penv = "/usr/bin:/bin:/usr/sbin:/sbin:/usr/X11R6/bin:/usr/local/bin:/usr/local/sbin";
-            std::string home = envvar_value_from_process_id(process_id, "HOME");
+            std::string home = cppstr_getenv(process_id, "HOME");
             if (!home.empty()) {
               penv = home + "/bin:" + penv;
             }
@@ -356,7 +356,7 @@ namespace pidpath {
           }
         }
         if (path.empty() && slash_pos > 0) {
-          std::string pwd = envvar_value_from_process_id(process_id, "PWD");
+          std::string pwd = cppstr_getenv(process_id, "PWD");
           if (!pwd.empty()) {
             argv0 = pwd + "/" + buffer[0];
             path = is_exe(process_id, argv0);
@@ -390,7 +390,7 @@ namespace pidpath {
       if (path.empty() && !error) {
         error = true;
         buffer.clear();
-        std::string underscore = envvar_value_from_process_id(process_id, "_");
+        std::string underscore = cppstr_getenv(process_id, "_");
         if (!underscore.empty()) {
           buffer.push_back(underscore);
           goto fallback;

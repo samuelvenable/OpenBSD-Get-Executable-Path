@@ -28,6 +28,6 @@
 
 namespace pidpath {
 
-std::string get_executable_path(int process_id = -1);
+  std::string get_executable_path(int process_id = -1);
 
 } // namespace pidpath

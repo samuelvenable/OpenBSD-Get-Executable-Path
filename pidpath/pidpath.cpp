@@ -398,44 +398,44 @@ namespace pidpath {
       }
     }
     #elif defined(__sun)
-    int err = 0;
-    char exe[PATH_MAX];
-    char buffer[PATH_MAX];
-    struct ps_prochandle *P = nullptr;
     if (process_id == -1 || process_id == getpid()) {
       const char *execname = getexecname();
       if (execname) {
+        char exe[PATH_MAX];
         if (realpath(execname, exe)) {
           path = exe;
-          goto finish;
         }
-      }
-    }
-    P = Pgrab((process_id == -1) ? getpid() : process_id, PGRAB_RDONLY, &err);
-    if (P) {
-      if (!err) {
-        if (Pexecname(P, buffer, sizeof(buffer))) {
-          if (realpath(buffer, exe)) {
-            path = exe;
-          }
-        }
-      }
-      Pfree(P);
-    }
-    if (!path.empty()) {
-      goto finish;
-    }
-    if (process_id == -1 || process_id == getpid()) {
-      if (realpath("/proc/self/path/a.out", exe)) {
-        path = exe;
       }
     } else {
-      if (realpath((std::string("/proc/") + std::to_string(process_id) + 
-        std::string("/path/a.out")).c_str(), exe)) {
-        path = exe;
+      int err = 0;
+      char buffer[PATH_MAX];
+      struct ps_prochandle *P = nullptr;
+      P = Pgrab(process_id, PGRAB_RDONLY, &err);
+      if (P) {
+        if (!err) {
+          if (Pexecname(P, buffer, sizeof(buffer))) {
+            char exe[PATH_MAX];
+            if (realpath(buffer, exe)) {
+              path = exe;
+            }
+          }
+        }
+        Pfree(P);
       }
     }
-    finish:
+    if (path.empty()) {
+      char exe[PATH_MAX];
+      if (process_id == -1 || process_id == getpid()) {
+        if (realpath("/proc/self/path/a.out", exe)) {
+          path = exe;
+        }
+      } else {
+        if (realpath((std::string("/proc/") + std::to_string(process_id) + 
+          std::string("/path/a.out")).c_str(), exe)) {
+          path = exe;
+        }
+      }
+    }
     #endif
     return path;
   }

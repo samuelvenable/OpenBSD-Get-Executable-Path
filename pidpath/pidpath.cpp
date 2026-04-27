@@ -40,14 +40,14 @@
 #include <winnt.h>
 #include <ntdef.h>
 #elif (defined(__APPLE__) && defined(__MACH__))
-#include <TargetConditionals.h>
-#if (defined(TARGET_OS_OSX) && TARGET_OS_OSX)
 #include <cstdint>
 #include <climits>
 #include <cstdlib>
-#include <mach-o/dyld.h>
-#include <libproc.h>
 #include <unistd.h>
+#include <mach-o/dyld.h>
+#include <TargetConditionals.h>
+#if (defined(TARGET_OS_OSX) && TARGET_OS_OSX)
+#include <libproc.h>
 #endif
 #elif defined(__linux__)
 #include <climits>
@@ -146,7 +146,7 @@ namespace pidpath {
       }
       CloseHandle(process);
     }
-    #elif (defined(__APPLE__) && defined(__MACH__) && defined(TARGET_OS_OSX) && TARGET_OS_OSX)
+    #elif (defined(__APPLE__) && defined(__MACH__))
     if (process_id == -1 || process_id == getpid()) {
       char exe[PATH_MAX];
       std::uint32_t size = sizeof(exe);
@@ -156,6 +156,7 @@ namespace pidpath {
           path = buffer;
         }
       }
+    #if (defined(TARGET_OS_OSX) && TARGET_OS_OSX)
     } else {
       char exe[PROC_PIDPATHINFO_MAXSIZE];
       if (proc_pidpath(process_id, exe, sizeof(exe)) > 0) {
@@ -164,6 +165,7 @@ namespace pidpath {
           path = buffer;
         }
       }
+    #endif
     }
     #elif defined(__linux__)
     char exe[PATH_MAX];

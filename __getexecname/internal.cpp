@@ -85,12 +85,12 @@ const char *__getexecname(void) {
     FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, 
     nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hFile != INVALID_HANDLE_VALUE) {
-      DWORD result = GetFinalPathNameByHandleW(hFile, path, MAX_PATH, 0);
-      if (result) {
+      DWORD len = GetFinalPathNameByHandleW(hFile, path, MAX_PATH, 0);
+      if (len) {
         if (wcslen(path) >= 4 && path[0] == '\\' && path[1] == '\\' && path[2] == '?' && path[3] == '\\') {
-          result = std::wstring(path + 4, (std::size_t)(path + result));
+          result = std::wstring(path + 4, (std::size_t)(path + len));
         } else {
-          result = std::wstring(path, (std::size_t)(path + result));
+          result = std::wstring(path, (std::size_t)(path + len));
         }
       }
       CloseHandle(hFile);

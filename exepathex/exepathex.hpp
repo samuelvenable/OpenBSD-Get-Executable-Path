@@ -26,8 +26,8 @@
 
 #include <string>
 
-namespace pidpath {
+namespace exepathex {
 
-  std::string get_executable_path(int process_id = -1);
+  std::string exepathex(int process_id = -1);
 
-} // namespace pidpath
+} // namespace exepathex

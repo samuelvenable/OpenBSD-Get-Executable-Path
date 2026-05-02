@@ -142,7 +142,7 @@ namespace exepath {
       }
     }
     #elif defined(__OpenBSD__)
-    auto is_exe = [](std::string exe) {
+    auto verifyexe = [](std::string exe) {
       int cntp = 0;
       std::string res;
       kvm_t *kd = nullptr;
@@ -206,7 +206,7 @@ namespace exepath {
       std::size_t colon_pos = buffer.find(':');
       if (slash_pos == 0) {
         argv0 = buffer;
-        path = is_exe(argv0);
+        path = verifyexe(argv0);
       } else if (slash_pos == std::string::npos || slash_pos > colon_pos) { 
         std::string penv = cppgetenv("PATH");
         if (!penv.empty()) {
@@ -215,11 +215,11 @@ namespace exepath {
           std::stringstream sstr(penv);
           while (std::getline(sstr, tmp, ':')) {
             argv0 = tmp + "/" + buffer;
-            path = is_exe(argv0);
+            path = verifyexe(argv0);
             if (!path.empty()) break;
             if (slash_pos > colon_pos) {
               argv0 = tmp + "/" + buffer.substr(0, colon_pos);
-              path = is_exe(argv0);
+              path = verifyexe(argv0);
               if (!path.empty()) break;
             }
           }
@@ -238,13 +238,13 @@ namespace exepath {
         std::string pwd = cppgetenv("PWD");
         if (!pwd.empty()) {
           argv0 = pwd + "/" + buffer;
-          path = is_exe(argv0);
+          path = verifyexe(argv0);
         }
         if (path.empty()) {
           char cwd[PATH_MAX];
           if (getcwd(cwd, PATH_MAX)) {
             argv0 = std::string(cwd) + "/" + buffer;
-            path = is_exe(argv0);
+            path = verifyexe(argv0);
           }
         }
       }

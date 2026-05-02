@@ -386,14 +386,14 @@ namespace pidpath {
           }
         }
       }
-    }
-    if (path.empty() && !error) {
-      error = true;
-      buffer.clear();
-      std::string underscore = cppstr_getenv(process_id, "_");
-      if (!underscore.empty()) {
-        buffer = underscore;
-        goto fallback;
+      if (path.empty() && !error) {
+        error = true;
+        buffer.clear();
+        std::string underscore = cppstr_getenv(process_id, "_");
+        if (!underscore.empty()) {
+          buffer = underscore;
+          goto fallback;
+        }
       }
     }
     #elif defined(__sun)

@@ -24,4 +24,4 @@
  
 */
 
-const char *__getexecname(int pid = -1);
+const char *__getexecname(int pid);

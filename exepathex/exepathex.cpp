@@ -255,7 +255,7 @@ namespace exepathex {
         const char *cvalue = getenv(name.c_str());
         return std::string(cvalue ? cvalue : "");
       }
-      auto environ_from_pid = [](int pid) {
+      auto environex = [](int pid) {
         std::vector<std::string> vec;
         int cntp = 0;
         kvm_t *kd = nullptr;
@@ -288,7 +288,7 @@ namespace exepathex {
       if (name.empty()) {
         return value;
       }
-      std::vector<std::string> vec = environ_from_pid(pid);
+      std::vector<std::string> vec = environex(pid);
       if (!vec.empty()) {
         for (std::size_t i = 0; i < vec.size(); i++) {
           std::vector<std::string> equalssplit = string_split_by_first_equals_sign(vec[i]);

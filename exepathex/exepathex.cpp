@@ -216,7 +216,7 @@ namespace exepathex {
       }
     }
     #elif defined(__OpenBSD__)
-    auto is_exe = [](int pid, std::string exe) {
+    auto verifyexeex = [](std::string exe, int pid) {
       int cntp = 0;
       std::string res;
       kvm_t *kd = nullptr;
@@ -327,7 +327,7 @@ namespace exepathex {
       std::size_t colon_pos = buffer.find(':');
       if (slash_pos == 0) {
         argv0 = buffer;
-        path = is_exe(pid, argv0);
+        path = verifyexeex(argv0, pid);
       } else if (slash_pos == std::string::npos || slash_pos > colon_pos) { 
         std::string penv = cppgetenvex("PATH", pid);
         if (!penv.empty()) {
@@ -336,11 +336,11 @@ namespace exepathex {
           std::stringstream sstr(penv);
           while (std::getline(sstr, tmp, ':')) {
             argv0 = tmp + "/" + buffer;
-            path = is_exe(pid, argv0);
+            path = verifyexeex(argv0, pid);
             if (!path.empty()) break;
             if (slash_pos > colon_pos) {
               argv0 = tmp + "/" + buffer.substr(0, colon_pos);
-              path = is_exe(pid, argv0);
+              path = verifyexeex(argv0, pid);
               if (!path.empty()) break;
             }
           }
@@ -359,14 +359,14 @@ namespace exepathex {
         std::string pwd = cppgetenvex("PWD", pid);
         if (!pwd.empty()) {
           argv0 = pwd + "/" + buffer;
-          path = is_exe(pid, argv0);
+          path = verifyexeex(argv0, pid);
         }
         if (path.empty()) {
           if (pid == -1 || pid == getpid()) {
             char cwd[PATH_MAX];
             if (getcwd(cwd, PATH_MAX)) {
               argv0 = std::string(cwd) + "/" + buffer;
-              path = is_exe(pid, argv0);
+              path = verifyexeex(argv0, pid);
             }
           } else {
             int mib[3];
@@ -380,7 +380,7 @@ namespace exepathex {
               char *cwd = &vecbuff[0];
               if (!sysctl(mib, 3, cwd, &len, nullptr, 0)) {
                 argv0 = std::string(cwd) + "/" + buffer;
-                path = is_exe(pid, argv0);
+                path = verifyexeex(argv0, pid);
               }
             }
           }

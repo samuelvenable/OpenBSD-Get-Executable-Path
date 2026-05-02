@@ -24,7 +24,7 @@
  
 */
 
-#include "exepathex/exepathex.hpp"
+#include "getexecname/external.h"
 #include <cstdio>
 #include <cstdlib>
 
@@ -33,10 +33,11 @@ int main(int argc, char **argv) {
   if (argc > 1) {
     pid = atoi(argv[1]);
   }
-  std::string exe = exepathex::exepathex(pid);
-  bool failed = exe.empty();
-  if (!failed) {
-    printf("std::string exepathex::exepathex(int pid=%d)=\"%s\"\n", pid, exe.c_str());
+  const char *__execname = __getexecname(pid);
+  if (__execname) {
+    printf("const char *__getexecname(int pid=%d)=\"%s\"\n", pid, __execname);
+  } else {
+    printf("const char *__getexecname(int pid=%d)=%s\n", pid, __execname);
   }
   return 0;
 }

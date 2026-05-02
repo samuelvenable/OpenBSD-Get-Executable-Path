@@ -33,9 +33,9 @@ SOFTWARE.
 #include <cstdlib>
 #include <windef.h>
 #include <fileapi.h>
-#include <handleapi.h>
 #include <stringapiset.h>
 #include <libloaderapi.h>
+#include <handleapi.h>
 #elif (defined(__APPLE__) && defined(__MACH__))
 #include <cstdint>
 #include <climits>

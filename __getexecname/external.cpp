@@ -111,7 +111,7 @@ const char *__getexecname(int pid) {
       }
     }
     return std::wstring("");
-  }
+  };
   auto narrow = [](std::wstring wstr) {
     if (wstr.empty()) return std::string("");
     int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr);

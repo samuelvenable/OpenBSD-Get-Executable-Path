@@ -90,9 +90,9 @@
 
 namespace exepathex {
 
-  std::string get_executable_path(int process_id) {
+  std::string get_executable_path(int pid) {
     std::string path;
-    if (process_id < -1) {
+    if (pid < -1) {
       return path;
     }
     #if defined(_WIN32)
@@ -102,7 +102,7 @@ namespace exepathex {
       std::vector<char> buf(nbytes);
       return std::string { buf.data(), (std::size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
     };
-    auto open_process_with_debug_privilege = [](int process_id) {
+    auto open_process_with_debug_privilege = [](int pid) {
       HANDLE process = nullptr;
       HANDLE hToken = nullptr;
       LUID luid;
@@ -113,17 +113,17 @@ namespace exepathex {
           tkp.Privileges[0].Luid = luid;
           tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
           if (AdjustTokenPrivileges(hToken, false, &tkp, sizeof(tkp), nullptr, nullptr)) {
-            process = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD)process_id);
+            process = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD)pid);
           }
         }
         CloseHandle(hToken);
       }
       if (!process) {
-        process = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD)process_id);
+        process = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD)pid);
       }
       return process;
     };
-    if (process_id == -1 || process_id == (int)GetCurrentProcessId()) {
+    if (pid == -1 || pid == (int)GetCurrentProcessId()) {
       wchar_t buffer[MAX_PATH];
       if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer))) {
         wchar_t exe[MAX_PATH];
@@ -132,7 +132,7 @@ namespace exepathex {
         }
       }
     } else {
-      HANDLE process = open_process_with_debug_privilege(process_id);
+      HANDLE process = open_process_with_debug_privilege(pid);
       if (!process) { 
         return path;
       }
@@ -147,7 +147,7 @@ namespace exepathex {
       CloseHandle(process);
     }
     #elif (defined(__APPLE__) && defined(__MACH__))
-    if (process_id == -1 || process_id == getpid()) {
+    if (pid == -1 || pid == getpid()) {
       char exe[PATH_MAX];
       std::uint32_t size = sizeof(exe);
       if (!_NSGetExecutablePath(exe, &size)) {
@@ -159,7 +159,7 @@ namespace exepathex {
     #if (defined(TARGET_OS_OSX) && TARGET_OS_OSX)
     } else {
       char exe[PROC_PIDPATHINFO_MAXSIZE];
-      if (proc_pidpath(process_id, exe, sizeof(exe)) > 0) {
+      if (proc_pidpath(pid, exe, sizeof(exe)) > 0) {
         char buffer[PATH_MAX];
         if (realpath(exe, buffer)) {
           path = buffer;
@@ -169,12 +169,12 @@ namespace exepathex {
     }
     #elif defined(__linux__)
     char exe[PATH_MAX];
-    if (process_id == -1 || process_id == getpid()) {
+    if (pid == -1 || pid == getpid()) {
       if (realpath("/proc/self/exe", exe)) {
         path = exe;
       }
     } else {
-      if (realpath((std::string("/proc/") + std::to_string(process_id) + 
+      if (realpath((std::string("/proc/") + std::to_string(pid) + 
         std::string("/exe")).c_str(), exe)) {
         path = exe;
       }
@@ -185,7 +185,7 @@ namespace exepathex {
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC;
     mib[2] = KERN_PROC_PATHNAME;
-    mib[3] = process_id;
+    mib[3] = pid;
     if (!sysctl(mib, 4, nullptr, &len, nullptr, 0)) {
       std::string strbuff;
       strbuff.resize(len, '\0');
@@ -202,7 +202,7 @@ namespace exepathex {
     std::size_t len = 0;
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC_ARGS;
-    mib[2] = process_id;
+    mib[2] = pid;
     mib[3] = KERN_PROC_PATHNAME;
     if (!sysctl(mib, 4, nullptr, &len, nullptr, 0)) {
       std::string strbuff;
@@ -216,7 +216,7 @@ namespace exepathex {
       }
     }
     #elif defined(__OpenBSD__)
-    auto is_exe = [](int process_id, std::string exe) {
+    auto is_exe = [](int pid, std::string exe) {
       int cntp = 0;
       std::string res;
       kvm_t *kd = nullptr;
@@ -224,7 +224,7 @@ namespace exepathex {
       bool error = false;
       kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
       if (!kd) return res;
-      if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, (process_id == -1) ? getpid() : process_id, sizeof(struct kinfo_file), &cntp))) {
+      if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, (pid == -1) ? getpid() : pid, sizeof(struct kinfo_file), &cntp))) {
         for (int i = 0; i < cntp && kif[i].fd_fd < 0; i++) {
           if (kif[i].fd_fd == KERN_FILE_TEXT) {
             struct stat st;
@@ -250,12 +250,12 @@ namespace exepathex {
       kvm_close(kd);
       return res;
     };
-    auto cppstr_getenv = [](int process_id, std::string name) {
-      if (process_id == -1 || process_id == getpid()) {
+    auto cppstr_getenv = [](int pid, std::string name) {
+      if (pid == -1 || pid == getpid()) {
         const char *cvalue = getenv(name.c_str());
         return std::string(cvalue ? cvalue : "");
       }
-      auto environ_from_process_id = [](int process_id) {
+      auto environ_from_pid = [](int pid) {
         std::vector<std::string> vec;
         int cntp = 0;
         kvm_t *kd = nullptr;
@@ -264,7 +264,7 @@ namespace exepathex {
         if (!kd) {
           return vec;
         }
-        if ((process_info = kvm_getprocs(kd, KERN_PROC_PID, process_id, sizeof(struct kinfo_proc), &cntp))) {
+        if ((process_info = kvm_getprocs(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &cntp))) {
           char **env = kvm_getenvv(kd, process_info, 0);
           if (env) {
             for (int i = 0; env[i]; i++) {
@@ -288,7 +288,7 @@ namespace exepathex {
       if (name.empty()) {
         return value;
       }
-      std::vector<std::string> vec = environ_from_process_id(process_id);
+      std::vector<std::string> vec = environ_from_pid(pid);
       if (!vec.empty()) {
         for (std::size_t i = 0; i < vec.size(); i++) {
           std::vector<std::string> equalssplit = string_split_by_first_equals_sign(vec[i]);
@@ -311,7 +311,7 @@ namespace exepathex {
     if (!kd) {
       return path;
     }
-    if ((process_info = kvm_getprocs(kd, KERN_PROC_PID, (process_id == -1) ? getpid() : process_id, sizeof(struct kinfo_proc), &cntp))) {
+    if ((process_info = kvm_getprocs(kd, KERN_PROC_PID, (pid == -1) ? getpid() : pid, sizeof(struct kinfo_proc), &cntp))) {
       char **cmd = kvm_getargv(kd, process_info, 0);
       if (cmd) {
         if (cmd[0]) {
@@ -327,20 +327,20 @@ namespace exepathex {
       std::size_t colon_pos = buffer.find(':');
       if (slash_pos == 0) {
         argv0 = buffer;
-        path = is_exe(process_id, argv0);
+        path = is_exe(pid, argv0);
       } else if (slash_pos == std::string::npos || slash_pos > colon_pos) { 
-        std::string penv = cppstr_getenv(process_id, "PATH");
+        std::string penv = cppstr_getenv(pid, "PATH");
         if (!penv.empty()) {
           retry:
           std::string tmp;
           std::stringstream sstr(penv);
           while (std::getline(sstr, tmp, ':')) {
             argv0 = tmp + "/" + buffer;
-            path = is_exe(process_id, argv0);
+            path = is_exe(pid, argv0);
             if (!path.empty()) break;
             if (slash_pos > colon_pos) {
               argv0 = tmp + "/" + buffer.substr(0, colon_pos);
-              path = is_exe(process_id, argv0);
+              path = is_exe(pid, argv0);
               if (!path.empty()) break;
             }
           }
@@ -348,7 +348,7 @@ namespace exepathex {
         if (path.empty() && !retried) {
           retried = true;
           penv = "/usr/bin:/bin:/usr/sbin:/sbin:/usr/X11R6/bin:/usr/local/bin:/usr/local/sbin";
-          std::string home = cppstr_getenv(process_id, "HOME");
+          std::string home = cppstr_getenv(pid, "HOME");
           if (!home.empty()) {
             penv = home + "/bin:" + penv;
           }
@@ -356,31 +356,31 @@ namespace exepathex {
         }
       }
       if (path.empty() && slash_pos > 0) {
-        std::string pwd = cppstr_getenv(process_id, "PWD");
+        std::string pwd = cppstr_getenv(pid, "PWD");
         if (!pwd.empty()) {
           argv0 = pwd + "/" + buffer;
-          path = is_exe(process_id, argv0);
+          path = is_exe(pid, argv0);
         }
         if (path.empty()) {
-          if (process_id == -1 || process_id == getpid()) {
+          if (pid == -1 || pid == getpid()) {
             char cwd[PATH_MAX];
             if (getcwd(cwd, PATH_MAX)) {
               argv0 = std::string(cwd) + "/" + buffer;
-              path = is_exe(process_id, argv0);
+              path = is_exe(pid, argv0);
             }
           } else {
             int mib[3];
             std::size_t len = 0;
             mib[0] = CTL_KERN;
             mib[1] = KERN_PROC_CWD;
-            mib[2] = process_id;
+            mib[2] = pid;
             if (!sysctl(mib, 3, nullptr, &len, nullptr, 0)) {
               std::vector<char> vecbuff;
               vecbuff.resize(len);
               char *cwd = &vecbuff[0];
               if (!sysctl(mib, 3, cwd, &len, nullptr, 0)) {
                 argv0 = std::string(cwd) + "/" + buffer;
-                path = is_exe(process_id, argv0);
+                path = is_exe(pid, argv0);
               }
             }
           }
@@ -389,7 +389,7 @@ namespace exepathex {
       if (path.empty() && !error) {
         error = true;
         buffer.clear();
-        std::string underscore = cppstr_getenv(process_id, "_");
+        std::string underscore = cppstr_getenv(pid, "_");
         if (!underscore.empty()) {
           buffer = underscore;
           goto fallback;
@@ -397,7 +397,7 @@ namespace exepathex {
       }
     }
     #elif defined(__sun)
-    if (process_id == -1 || process_id == getpid()) {
+    if (pid == -1 || pid == getpid()) {
       const char *execname = getexecname();
       if (execname) {
         char exe[PATH_MAX];
@@ -409,7 +409,7 @@ namespace exepathex {
       int err = 0;
       char buffer[PATH_MAX];
       struct ps_prochandle *P = nullptr;
-      P = Pgrab(process_id, PGRAB_RDONLY, &err);
+      P = Pgrab(pid, PGRAB_RDONLY, &err);
       if (P) {
         if (!err) {
           if (Pexecname(P, buffer, sizeof(buffer))) {
@@ -424,12 +424,12 @@ namespace exepathex {
     }
     if (path.empty()) {
       char exe[PATH_MAX];
-      if (process_id == -1 || process_id == getpid()) {
+      if (pid == -1 || pid == getpid()) {
         if (realpath("/proc/self/path/a.out", exe)) {
           path = exe;
         }
       } else {
-        if (realpath((std::string("/proc/") + std::to_string(process_id) + 
+        if (realpath((std::string("/proc/") + std::to_string(pid) + 
           std::string("/path/a.out")).c_str(), exe)) {
           path = exe;
         }

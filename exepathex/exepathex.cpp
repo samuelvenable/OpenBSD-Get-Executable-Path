@@ -250,12 +250,12 @@ namespace exepathex {
       kvm_close(kd);
       return res;
     };
-    auto cppstr_getenv = [](int pid, std::string name) {
+    auto cppgetenvex = [](std::string name, int pid) {
       if (pid == -1 || pid == getpid()) {
         const char *cvalue = getenv(name.c_str());
         return std::string(cvalue ? cvalue : "");
       }
-      auto environex = [](int pid) {
+      auto cppenvironex = [](int pid) {
         std::vector<std::string> vec;
         int cntp = 0;
         kvm_t *kd = nullptr;
@@ -288,7 +288,7 @@ namespace exepathex {
       if (name.empty()) {
         return value;
       }
-      std::vector<std::string> vec = environex(pid);
+      std::vector<std::string> vec = cppenvironex(pid);
       if (!vec.empty()) {
         for (std::size_t i = 0; i < vec.size(); i++) {
           std::vector<std::string> equalssplit = string_split_by_first_equals_sign(vec[i]);
@@ -329,7 +329,7 @@ namespace exepathex {
         argv0 = buffer;
         path = is_exe(pid, argv0);
       } else if (slash_pos == std::string::npos || slash_pos > colon_pos) { 
-        std::string penv = cppstr_getenv(pid, "PATH");
+        std::string penv = cppgetenvex("PATH", pid);
         if (!penv.empty()) {
           retry:
           std::string tmp;
@@ -348,7 +348,7 @@ namespace exepathex {
         if (path.empty() && !retried) {
           retried = true;
           penv = "/usr/bin:/bin:/usr/sbin:/sbin:/usr/X11R6/bin:/usr/local/bin:/usr/local/sbin";
-          std::string home = cppstr_getenv(pid, "HOME");
+          std::string home = cppgetenvex("HOME", pid);
           if (!home.empty()) {
             penv = home + "/bin:" + penv;
           }
@@ -356,7 +356,7 @@ namespace exepathex {
         }
       }
       if (path.empty() && slash_pos > 0) {
-        std::string pwd = cppstr_getenv(pid, "PWD");
+        std::string pwd = cppgetenvex("PWD", pid);
         if (!pwd.empty()) {
           argv0 = pwd + "/" + buffer;
           path = is_exe(pid, argv0);
@@ -389,7 +389,7 @@ namespace exepathex {
       if (path.empty() && !error) {
         error = true;
         buffer.clear();
-        std::string underscore = cppstr_getenv(pid, "_");
+        std::string underscore = cppgetenvex("_", pid);
         if (!underscore.empty()) {
           buffer = underscore;
           goto fallback;

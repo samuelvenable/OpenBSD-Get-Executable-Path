@@ -1,23 +1,23 @@
 #!/bin/sh
 cd "${0%/*}"
 if [ $(uname) = "Darwin" ]; then
-  clang++ getexecname/internal.cpp internal.cpp -o internal.out -std=c++17 -Wall -arch arm64 -arch x86_64; ./internal.out;
+  clang++ getexecname/internal.cpp internal.cpp -o getexecname -std=c++17 -Wall -arch arm64 -arch x86_64; ./getexecname;
 elif [ $(uname) = "Linux" ]; then
   if [ -f "/bin/g++" ]; then
-    g++ getexecname/internal.cpp internal.cpp -o internal.out -std=c++17 -Wall -static-libgcc -static-libstdc++ -static; ./internal.out;
+    g++ getexecname/internal.cpp internal.cpp -o getexecname -std=c++17 -Wall -static-libgcc -static-libstdc++ -static; ./getexecname;
   else
-    clang++ getexecname/internal.cpp internal.cpp -o internal.out -std=c++17 -Wall; ./internal.out;
+    clang++ getexecname/internal.cpp internal.cpp -o getexecname -std=c++17 -Wall; ./getexecname;
   fi
 elif [ $(uname) = "FreeBSD" ]; then
-  clang++ getexecname/internal.cpp internal.cpp -o internal.out -std=c++17 -Wall -static; ./internal.out;
+  clang++ getexecname/internal.cpp internal.cpp -o getexecname -std=c++17 -Wall -static; ./getexecname;
 elif [ $(uname) = "DragonFly" ]; then
-  g++ getexecname/internal.cpp internal.cpp -o internal.out -std=c++17 -Wall -static-libgcc -static-libstdc++ -static; ./internal.out;
+  g++ getexecname/internal.cpp internal.cpp -o getexecname -std=c++17 -Wall -static-libgcc -static-libstdc++ -static; ./getexecname;
 elif [ $(uname) = "NetBSD" ]; then
-  g++ getexecname/internal.cpp internal.cpp -o internal.out -std=c++17 -Wall -static-libgcc -static-libstdc++ -static; ./internal.out;
+  g++ getexecname/internal.cpp internal.cpp -o getexecname -std=c++17 -Wall -static-libgcc -static-libstdc++ -static; ./getexecname;
 elif [ $(uname) = "OpenBSD" ]; then
-  clang++ getexecname/internal.cpp internal.cpp -o internal.out -std=c++17 -Wall -lkvm -static; ./internal.out;
+  clang++ getexecname/internal.cpp internal.cpp -o getexecname -std=c++17 -Wall -lkvm -static; ./getexecname;
 elif [ $(uname) = "SunOS" ]; then
-  g++ getexecname/internal.cpp internal.cpp -o internal.out -std=c++17 -Wall -static-libgcc; ./internal.out;
+  g++ getexecname/internal.cpp internal.cpp -o getexecname -std=c++17 -Wall -static-libgcc; ./getexecname;
 else
-  g++ getexecname/internal.cpp internal.cpp -o internal.out.exe -std=c++17 -Wall -static-libgcc -static-libstdc++ -static -Wl,--subsystem,console; ./internal.out.exe;
+  g++ getexecname/internal.cpp internal.cpp -o getexecname.exe -std=c++17 -Wall -static-libgcc -static-libstdc++ -static -Wl,--subsystem,console; ./getexecname.exe;
 fi

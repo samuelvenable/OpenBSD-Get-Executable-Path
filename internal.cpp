@@ -24,7 +24,7 @@
  
 */
 
-#include "getexecname/internal.h"
+#include "__getexecname/internal.h"
 #include <cstdio>
 
 int main(int argc, char **argv) {

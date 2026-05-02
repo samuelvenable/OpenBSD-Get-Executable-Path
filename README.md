@@ -1,12 +1,12 @@
 # Cross-Platform: Executable Path from Self or PID
 ```cpp
-// pseudocode
+// Pseudocode for current executable's path:
 #include <__getexecname/internal.h>
 const char *internal = __getexecname(void);
 ```
 
 ```cpp
-// pseudocode
+// Pseudocode for executable path from PID:
 #include <__getexecname/external.h>
 const char *external = __getexecname(int pid = -1);
 ```

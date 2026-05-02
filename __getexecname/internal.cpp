@@ -186,7 +186,7 @@ const char *__getexecname() {
   bool error = false, retried = false;
   kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
   if (!kd) {
-    return path;
+    return nullptr;
   }
   if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, getpid(), sizeof(struct kinfo_proc), &cntp))) {
     char **cmd = kvm_getargv(kd, proc_info, 0);

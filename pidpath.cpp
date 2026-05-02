@@ -24,19 +24,19 @@
  
 */
 
-#include "pidpath/pidpath.hpp"
+#include "exepathex/exepathex.hpp"
 #include <cstdio>
 #include <cstdlib>
 
 int main(int argc, char **argv) {
-  int process_id = -1;
+  int pid = -1;
   if (argc > 1) {
-    process_id = atoi(argv[1]);
+    pid = atoi(argv[1]);
   }
-  std::string exe = pidpath::get_executable_path(process_id);
+  std::string exe = exepathex::exepathex(pid);
   bool failed = exe.empty();
   if (!failed) {
-    printf("pidpath::get_executable_path(%d) result: %s\n", process_id, exe.c_str());
+    printf("std::string exepathex::exepathex(int pid=%d)=\"%s\"\n", pid, exe.c_str());
   }
   return 0;
 }

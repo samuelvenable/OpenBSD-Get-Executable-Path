@@ -33,6 +33,7 @@ SOFTWARE.
 #include <cstdlib>
 #include <windef.h>
 #include <fileapi.h>
+#include <handleapi.h>
 #include <stringapiset.h>
 #include <libloaderapi.h>
 #elif (defined(__APPLE__) && defined(__MACH__))

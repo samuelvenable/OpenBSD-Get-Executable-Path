@@ -1,4 +1,4 @@
-# Cross-Platform: Executable Path from Self or PID
+# Cross-Platform: Executable Path Name from Self or PID
 ```c
 // Pseudocode for current executable's path:
 #include <__getexecname/internal.h>
